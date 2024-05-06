@@ -5,7 +5,8 @@ from rest_framework_simplejwt.views import (
 )
 
 from users.apps import UsersConfig
-from users.views import UserListView, UserDetailView, UserCreateView, UserUpdateView, UserDeleteView
+from users.views import UserListView, UserDetailView, UserCreateView, UserUpdateView, UserDeleteView, \
+    SetAdminIsNotActivePostAPIView
 
 app_name = UsersConfig.name
 
@@ -17,4 +18,6 @@ urlpatterns = [
     path('delete/<int:pk>/', UserDeleteView.as_view(), name='users-delete'),
     path("token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("set_active_or_not_admin/<int:pk>/", SetAdminIsNotActivePostAPIView.as_view(), name="set_active_adnin"),
+
 ]

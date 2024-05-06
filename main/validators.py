@@ -22,18 +22,19 @@ class StructureIsRightValidator:
     Проверка на соответствие иерархии
     """
 
-    def __init__(self, supplier, network_level):
-        self.supplier = supplier
-        self.network_level = network_level
+    def __init__(self, field):
+        self.field = field
 
     def __call__(self, value):
-        network_level = value.get(self.network_level)
-        supplier = value.get(self.supplier)
-        if network_level == 0 and supplier.network_level == 2 or supplier.network_level == 1:
-            raise serializers.ValidationError(
-                "У производителя не может быть поставщика уровня 1(посредника) и уровня 2(продавца потребителю)"
-            )
-        elif network_level == 1 and supplier.network_level == 2:
-            raise serializers.ValidationError(
-                "У звена уровня 1 (посредника) не может быть поставщика уровня 2(продавца конечному потребителю)"
-            )
+        network_level = dict(value).get('network_level')
+        supplier = dict(value).get('supplier')
+        if supplier:
+            supplier_level = int(supplier.network_level)
+            if network_level == 0 and supplier_level == 1 or supplier_level == 2:
+                raise serializers.ValidationError(
+                    "У производителя не может быть поставщика уровня 1(посредника) и уровня 2(продавца потребителю)"
+                )
+            if network_level == 1 and supplier_level == 2:
+                raise serializers.ValidationError(
+                    "У звена уровня 1 (посредника) не может быть поставщика уровня 2(продавца конечному потребителю)"
+                )
