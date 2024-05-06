@@ -1,5 +1,7 @@
 from django.db import models
 
+from users.models import User
+
 NULLABLE = {"blank": True, "null": True}
 
 
@@ -10,6 +12,7 @@ class Product(models.Model):
     title = models.CharField(max_length=100, verbose_name='название')
     product_model = models.CharField(max_length=100, verbose_name='продуктовая модель', **NULLABLE)
     launch_date = models.DateField(verbose_name='дата выхода товара на рынок')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='автор', **NULLABLE)
 
     def __str__(self):
         return f'{self.title}'
@@ -17,13 +20,15 @@ class Product(models.Model):
     class Meta:
         verbose_name = "товар"
         verbose_name_plural = "товары"
+        ordering = ['-launch_date']
 
 
 class NetworkLink(models.Model):
     """
     Модель для звена в сети по продаже электроники
     Иерархическая структура сети:
-    Теоретически у каждого из уровней может быть поставщик
+    Теоретически у каждого из уровней может быть поставщик - ограничение в уровне иерархии
+    (он может быть равен или ниже, математически выше)
     Уровень 0: Производитель(завод)
         Поставщиком может быть: Завод(Покупает запчати у другого завода доделывает и продает посреднику или продавцу
         для потребителей)
@@ -46,14 +51,15 @@ class NetworkLink(models.Model):
     city = models.CharField(max_length=100, verbose_name='город')
     street = models.CharField(max_length=100, verbose_name='улица')
     house_number = models.PositiveSmallIntegerField(verbose_name='дом')
-    product = models.ManyToManyField(Product, verbose_name='продукт')
-    supplier = models.ForeignKey('self', on_delete=models.PROTECT, verbose_name='поставщик', **NULLABLE)
+    product = models.ManyToManyField(Product, verbose_name='продукт', related_name='products_networklink')
+    supplier = models.ForeignKey('self', on_delete=models.CASCADE, verbose_name='поставщик', **NULLABLE)
     debt_to_supplier = models.DecimalField(decimal_places=2,
                                            max_digits=15,
                                            verbose_name='Задолженность перед поставщиком с точностью до копеек',
                                            **NULLABLE)
     created_at = models.DateTimeField(auto_now=True,
                                       verbose_name='Время создания(заполняется автоматически при создании)')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='автор', **NULLABLE)
 
     def __str__(self):
         return f'Название: {self.title}, Уровень: {self.network_level}, Контакты: {self.email}'
@@ -61,3 +67,4 @@ class NetworkLink(models.Model):
     class Meta:
         verbose_name = "звено сети по продаже электроники"
         verbose_name_plural = "звенья сети по продаже электроники"
+        ordering = ['network_level']

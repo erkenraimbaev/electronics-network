@@ -16,14 +16,35 @@ class NetworkLinkSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class NetworkLinkCreateUpdateSerializer(serializers.ModelSerializer):
+class NetworkLinkCreateSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = NetworkLink
-        fields = (
-            'network_level', 'title', 'email', 'country', 'city', 'street', 'house_number', 'supplier',
-            'debt_to_supplier',)
+        fields = '__all__'
         validators = [
-            StructureIsRightValidator(network_level='network_level', supplier='supplier'),
+            StructureIsRightValidator(fields),
             NoSupplierNoDebtValidator(supplier='supplier', debt_to_supplier='debt_to_supplier')
 
         ]
+
+
+class NetworkLinkUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = NetworkLink
+        fields = '__all__'
+        validators = [
+            StructureIsRightValidator(fields),
+            NoSupplierNoDebtValidator(supplier='supplier', debt_to_supplier='debt_to_supplier')
+
+        ]
+        # Запрет на обновление дебиторской задолженности через контроллер
+        read_only_fields = ["debt_to_supplier"]
+
+
+class ProductsNetworkLinkSerializer(serializers.ModelSerializer):
+    network_links = NetworkLinkSerializer(source='products_networklink', read_only=True, many=True)
+
+    class Meta:
+        model = Product
+        fields = '__all__'
