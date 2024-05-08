@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:14.7-alpine
+    env_file:
+      - .env
+    ports:
+      - '5433:5432'
+    volumes:
+      - pg_data:/var/lib/postgresql/data/
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    tty: true
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - '8000:8000'
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pg_data:
