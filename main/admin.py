@@ -1,8 +1,6 @@
 from django.contrib import admin
-from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.html import format_html
-from rest_framework.response import Response
 
 from main.models import Product, NetworkLink
 
