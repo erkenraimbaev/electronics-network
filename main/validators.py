@@ -28,13 +28,17 @@ class StructureIsRightValidator:
     def __call__(self, value):
         network_level = dict(value).get('network_level')
         supplier = dict(value).get('supplier')
+        if network_level == 1 or network_level == 2 and not supplier:
+            raise serializers.ValidationError(
+                "У поставщика уровня 1 и уровня 2 должен быть поставщик!"
+            )
         if supplier:
             supplier_level = int(supplier.network_level)
             if network_level == 0 and supplier_level == 1 or supplier_level == 2:
                 raise serializers.ValidationError(
-                    "У производителя не может быть поставщика уровня 1(посредника) и уровня 2(продавца потребителю)"
+                    "У производителя не может быть поставщика уровня 1 и уровня 2"
                 )
             if network_level == 1 and supplier_level == 2:
                 raise serializers.ValidationError(
-                    "У звена уровня 1 (посредника) не может быть поставщика уровня 2(продавца конечному потребителю)"
+                    "У звена уровня 1  не может быть поставщика уровня 2"
                 )
