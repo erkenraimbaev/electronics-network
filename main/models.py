@@ -29,19 +29,20 @@ class NetworkLink(models.Model):
     Иерархическая структура сети:
     Теоретически у каждого из уровней может быть поставщик - ограничение в уровне иерархии
     (он может быть равен или ниже, математически выше)
-    Уровень 0: Производитель(завод)
-        Поставщиком может быть: Завод(Покупает запчати у другого завода доделывает и продает посреднику или продавцу
-        для потребителей)
-    Уровень 1: Продает другому поставщику(Посредник)
-        Поставщиком может быть: Завод, Розничная сеть
-    Уровень 2: Продает потребителю
-        Поставщиком может быть: Розничная сеть, завод, ИП
+    Уровень 0: Поставщик - Производитель
+        Поставщиком здесь может быть: производитель уровня 0(Покупает запчати у другого завода доделывает и продает
+        посреднику или продавцу для потребителей)
+    Уровень 1: Поставщик - Розничная сеть, продает другому поставщику или потребителю
+        (Посредник или продавец потребителю)
+        Поставщиком может быть: уровни 0 или 1
+    Уровень 2: Поставщик - ИП
+        Поставщиком может быть: уровни 0, 1, 2
     """
 
     LEVELS = {
-        (0, 'Производитель'),
-        (1, 'Продает другому поставщику'),
-        (2, 'Продает потребителю'),
+        (0, 'Поставщик - производитель'),
+        (1, 'Поставщик - розничная сеть'),
+        (2, 'Поставщик - индивидуальный предприниматель'),
     }
 
     network_level = models.CharField(choices=LEVELS, verbose_name='уровень структуры')
@@ -51,7 +52,7 @@ class NetworkLink(models.Model):
     city = models.CharField(max_length=100, verbose_name='город')
     street = models.CharField(max_length=100, verbose_name='улица')
     house_number = models.PositiveSmallIntegerField(verbose_name='дом')
-    product = models.ManyToManyField(Product, verbose_name='продукт', related_name='products_networklink')
+    product = models.ManyToManyField(Product, verbose_name='продукт', related_name='products_networklink', **NULLABLE)
     supplier = models.ForeignKey('self', on_delete=models.CASCADE, verbose_name='поставщик', **NULLABLE)
     debt_to_supplier = models.DecimalField(decimal_places=2,
                                            max_digits=15,
